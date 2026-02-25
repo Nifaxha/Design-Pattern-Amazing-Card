@@ -11,7 +11,7 @@ RunSession::RunSession() {
 
 void RunSession::displayStatus() {
     cout << "\n==============================\n";
-    cout << "        MAGIC CARD CONSOLE       \n";
+    cout << "        AMAZING CARD CONSOLE       \n";
     cout << "==============================\n";
     cout << " Round: " << currentRound << "\n";
     cout << " Score: " << currentScore << " / " << targetScore << "\n";
