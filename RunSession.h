@@ -3,31 +3,31 @@
 
 #include <iostream>
 #include <vector>
-#include <string>
+#include "Card.h"
+#include "ScoringSystem.h"
+#include "modifiers/IModifier.h"
+#include "ShopSystem.h"
 
 class RunSession {
 private:
-    int currentScore;
+    int totalScore;
     int targetScore;
     int handsRemaining;
-    int discardsRemaining;
-    int currentRound;
+    int roundNumber;
+    std::vector<Card> currentHand;
+    std::vector<IModifier*> activeModifiers;
+    ScoringSystem scoringSystem;
+    ShopSystem shopSystem;
+
+    void generateHand();
+    void displayHand();
 
 public:
     RunSession();
-    
-    // Fungsi utama untuk menjalankan loop permainan
-    void startRound();
-    bool isRoundOver();
-    bool isGameOver();
-    
-    // Getters & Setters sederhana
-    void addScore(int points);
-    void useHand();
-    void useDiscard();
-    
-    // Display status ke terminal VS Code
-    void displayStatus();
+    ~RunSession();
+    void startRun();
+    void playHand();
+    void enterShop();
 };
 
 #endif
