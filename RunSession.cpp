@@ -1,12 +1,17 @@
 #include "RunSession.h"
 #include <sstream>
-using namespace std;
+#include <cstdlib> // Tambahkan ini untuk fungsi rand() dan srand()
+#include <ctime>   // Tambahkan ini untuk time()
+using namespace std; 
 
 RunSession::RunSession() {
     totalScore = 0;
     targetScore = 300;
     handsRemaining = 4;
     roundNumber = 1;
+
+    // Inisialisasi seed untuk random generator agar benar-benar acak setiap dijalankan
+    srand(static_cast<unsigned int>(time(0))); 
 }
 
 RunSession::~RunSession() {
@@ -16,9 +21,20 @@ RunSession::~RunSession() {
 }
 
 void RunSession::generateHand() {
-    currentHand = {
-        {"4", 4}, {"4", 4}, {"5", 5}, {"9", 9}, {"J", 10}, {"Q", 10}, {"2", 2}
+    currentHand.clear(); // Bersihkan kartu di tangan sebelumnya
+
+    // Kumpulan semua kemungkinan kartu (Deck)
+    vector<Card> deckPool = {
+        {"2", 2}, {"3", 3}, {"4", 4}, {"5", 5}, {"6", 6}, 
+        {"7", 7}, {"8", 8}, {"9", 9}, {"10", 10}, 
+        {"J", 10}, {"Q", 10}, {"K", 10}, {"A", 11}
     };
+
+    // Mengambil 7 kartu secara acak dari deckPool
+    for (int i = 0; i < 7; ++i) {
+        int randomIndex = rand() % deckPool.size();
+        currentHand.push_back(deckPool[randomIndex]);
+    }
 }
 
 void RunSession::displayHand() {
@@ -30,7 +46,8 @@ void RunSession::displayHand() {
 }
 
 void RunSession::playHand() {
-    generateHand();
+    generateHand(); // Kartu sekarang akan diacak di sini
+    
     while (handsRemaining > 0 && totalScore < targetScore) {
         cout << "\n==============================\n";
         cout << " Round: " << roundNumber << " | Target: " << targetScore << "\n";
@@ -67,6 +84,9 @@ void RunSession::playHand() {
 
         totalScore += handScore;
         handsRemaining--;
+        
+        // Acak kartu lagi untuk tangan berikutnya setelah pemain membuang "Hands"
+        generateHand(); 
     }
 }
 
@@ -79,7 +99,7 @@ void RunSession::enterShop() {
 
 void RunSession::startRun() {
     cout << "Selamat Datang di AMAZING CARD!\n";
-    for (int i = 0; i < 3; i++) { // Minimal 3 rounds (seperti di dokumen pretest)
+    for (int i = 0; i < 3; i++) { 
         totalScore = 0;
         handsRemaining = 4;
         
@@ -89,7 +109,7 @@ void RunSession::startRun() {
             cout << "\n*** KAMU MEMENANGKAN ROUND " << roundNumber << "! ***\n";
             enterShop();
             roundNumber++;
-            targetScore += 400; // Tingkatkan kesulitan
+            targetScore += 400; 
         } else {
             cout << "\n*** GAME OVER! Target tidak tercapai. ***\n";
             return;
