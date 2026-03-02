@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+using namespace std;
 
 RunSession::RunSession() {
     totalScore = 0;
@@ -10,7 +11,7 @@ RunSession::RunSession() {
     handsRemaining = 4;
     discardsRemaining = 3;
     roundNumber = 1;
-    std::srand(static_cast<unsigned int>(std::time(0))); 
+    srand(static_cast<unsigned int>(time(0))); 
 }
 
 RunSession::~RunSession() {
@@ -19,12 +20,12 @@ RunSession::~RunSession() {
 
 // Fungsi ini hanya mengisi slot kosong di tangan sampai jumlahnya 7
 void RunSession::fillHand() {
-    std::vector<std::string> suits = {"Heart", "Spade", "Club", "Diamond"};
-    std::vector<Card> deckPool;
+    vector<string> suits = {"Heart", "Spade", "Club", "Diamond"};
+    vector<Card> deckPool;
     
     // Bikin referensi deck
     for (const auto& suit : suits) {
-        for (int i = 2; i <= 10; i++) deckPool.push_back({std::to_string(i), i, suit});
+        for (int i = 2; i <= 10; i++) deckPool.push_back({to_string(i), i, suit});
         deckPool.push_back({"J", 10, suit});
         deckPool.push_back({"Q", 10, suit});
         deckPool.push_back({"K", 10, suit});
@@ -33,18 +34,18 @@ void RunSession::fillHand() {
 
     // Isi kartu sampai penuh (7 kartu)
     while (currentHand.size() < 7) {
-        int randomIndex = std::rand() % deckPool.size();
+        int randomIndex = rand() % deckPool.size();
         currentHand.push_back(deckPool[randomIndex]);
     }
 }
 
 void RunSession::displayHand() {
-    std::cout << "\nKartu di tangan anda:\n";
+    cout << "\nKartu di tangan anda:\n";
     // Tampilkan format: Nilai-Suit (Contoh: 10-Heart)
-    for (const auto& c : currentHand) std::cout << c.display << "-" << c.suit[0] << "   "; 
-    std::cout << "\n";
-    for (size_t i = 1; i <= currentHand.size(); ++i) std::cout << " (" << i << ")   ";
-    std::cout << "\n";
+    for (const auto& c : currentHand) cout << c.display << "-" << c.suit[0] << "   "; 
+    cout << "\n";
+    for (size_t i = 1; i <= currentHand.size(); ++i) cout << " (" << i << ")   ";
+    cout << "\n";
 }
 
 void RunSession::playHand() {
@@ -52,22 +53,22 @@ void RunSession::playHand() {
     fillHand(); 
     
     while (handsRemaining > 0 && totalScore < targetScore) {
-        std::cout << "\n==================================================\n";
-        std::cout << " Round: " << roundNumber << " | Target Score: " << targetScore << "\n";
-        std::cout << " Current: " << totalScore << " | Hands: " << handsRemaining << " | Discards: " << discardsRemaining << "\n";
-        std::cout << "==================================================\n";
+        cout << "\n==================================================\n";
+        cout << " Round: " << roundNumber << " | Target Score: " << targetScore << "\n";
+        cout << " Current: " << totalScore << " | Hands: " << handsRemaining << " | Discards: " << discardsRemaining << "\n";
+        cout << "==================================================\n";
 
         displayHand();
         
-        std::cout << "\nPilih kartu (masukkan urutan angka, pisahkan spasi, akhiri angka 0): ";
+        cout << "\nPilih kartu (masukkan urutan angka, pisahkan spasi, akhiri angka 0): ";
         int choice;
-        std::vector<int> selectedIndices;
-        std::vector<Card> selectedCards;
+        vector<int> selectedIndices;
+        vector<Card> selectedCards;
         
-        while (std::cin >> choice && choice != 0) {
+        while (cin >> choice && choice != 0) {
             // Pastikan input valid dan tidak ada duplikat index
             if (choice > 0 && choice <= currentHand.size()) {
-                if (std::find(selectedIndices.begin(), selectedIndices.end(), choice) == selectedIndices.end()) {
+                if (find(selectedIndices.begin(), selectedIndices.end(), choice) == selectedIndices.end()) {
                     selectedIndices.push_back(choice);
                     selectedCards.push_back(currentHand[choice - 1]);
                 }
@@ -75,34 +76,34 @@ void RunSession::playHand() {
         }
 
         if (selectedCards.empty()) {
-            std::cout << "Kamu belum memilih kartu apa pun!\n";
+            cout << "Kamu belum memilih kartu apa pun!\n";
             continue;
         }
 
-        std::cout << "\nApakah kamu ingin:\n";
-        std::cout << "[1] Mainkan Kartu Ini\n";
-        std::cout << "[2] Buang (Discard) Kartu Ini\n";
-        std::cout << "Pilih (1/2): ";
+        cout << "\nApakah kamu ingin:\n";
+        cout << "[1] Mainkan Kartu Ini\n";
+        cout << "[2] Buang (Discard) Kartu Ini\n";
+        cout << "Pilih (1/2): ";
         int action;
-        std::cin >> action;
+        cin >> action;
 
         if (action == 2) {
             if (discardsRemaining > 0) {
                 discardsRemaining--;
-                std::cout << "\n>> Membuang " << selectedIndices.size() << " kartu...\n";
+                cout << "\n>> Membuang " << selectedIndices.size() << " kartu...\n";
             } else {
-                std::cout << "\n>> GAGAL: Kesempatan Discard kamu sudah habis!\n";
+                cout << "\n>> GAGAL: Kesempatan Discard kamu sudah habis!\n";
                 continue; 
             }
         } 
         else if (action == 1) {
-            std::string handName;
+            string handName;
             int handScore = scoringSystem.evaluateHand(selectedCards, handName);
-            std::cout << "\n>> KOMBUNASI: " << handName << " | Base Score: " << handScore << "\n";
+            cout << "\n>> KOMBUNASI: " << handName << " | Base Score: " << handScore << "\n";
 
             for (auto mod : activeModifiers) {
                 handScore = mod->applyModification(handScore);
-                std::cout << ">> " << mod->getName() << " diterapkan! Skor menjadi: " << handScore << "\n";
+                cout << ">> " << mod->getName() << " diterapkan! Skor menjadi: " << handScore << "\n";
             }
 
             totalScore += handScore;
@@ -110,7 +111,7 @@ void RunSession::playHand() {
         }
 
         // Hapus kartu yang dipilih dari tangan (harus dihapus dari index terbesar dulu agar urutan tidak bergeser)
-        std::sort(selectedIndices.rbegin(), selectedIndices.rend());
+        sort(selectedIndices.rbegin(), selectedIndices.rend());
         for (int idx : selectedIndices) {
             currentHand.erase(currentHand.begin() + idx - 1);
         }
@@ -126,7 +127,7 @@ void RunSession::enterShop() {
 }
 
 void RunSession::startRun() {
-    std::cout << "Selamat Datang di AMAZING CARD!\n";
+    cout << "Selamat Datang di AMAZING CARD!\n";
     for (int i = 0; i < 3; i++) { 
         totalScore = 0;
         handsRemaining = 4;
@@ -135,14 +136,14 @@ void RunSession::startRun() {
         playHand();
         
         if (totalScore >= targetScore) {
-            std::cout << "\n*** KAMU MEMENANGKAN ROUND " << roundNumber << "! ***\n";
+            cout << "\n*** KAMU MEMENANGKAN ROUND " << roundNumber << "! ***\n";
             enterShop();
             roundNumber++;
             targetScore += 400; 
         } else {
-            std::cout << "\n*** GAME OVER! Target tidak tercapai. ***\n";
+            cout << "\n*** GAME OVER! Target tidak tercapai. ***\n";
             return;
         }
     }
-    std::cout << "\n*** SELAMAT! KAMU MEMENANGKAN GAME INI! ***\n";
+    cout << "\n*** SELAMAT! KAMU MEMENANGKAN GAME INI! ***\n";
 }
