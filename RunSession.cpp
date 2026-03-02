@@ -12,7 +12,7 @@ RunSession::RunSession() {
     handsRemaining = 4;
     discardsRemaining = 3;
     roundNumber = 1;
-    coins = 0; 
+    coins = 4; 
     srand(static_cast<unsigned int>(time(0))); 
 }
 
@@ -66,12 +66,18 @@ void RunSession::playHand() {
 
         displayHand();
         
-        cout << "\nPilih kartu (masukkan urutan angka, pisahkan spasi, akhiri angka 0): ";
+        cout << "\nPilih kartu (masukkan urutan angka, pisahkan spasi): ";
+        string inputLine;
+        // ws digunakan untuk membersihkan sisa 'Enter' dari input sebelumnya
+        getline(cin >> ws, inputLine); 
+        
+        stringstream ss(inputLine);
         int choice;
         vector<int> selectedIndices;
         vector<Card> selectedCards;
         
-        while (cin >> choice && choice != 0) {
+        // ss >> choice akan otomatis berhenti membaca jika sudah tidak ada angka di baris tersebut
+        while (ss >> choice) {
             if (choice > 0 && choice <= currentHand.size()) {
                 if (find(selectedIndices.begin(), selectedIndices.end(), choice) == selectedIndices.end()) {
                     selectedIndices.push_back(choice);
@@ -79,6 +85,7 @@ void RunSession::playHand() {
                 }
             }
         }
+        // ------------------------------------------------
 
         if (selectedCards.empty()) {
             cout << "Kamu belum memilih kartu apa pun!\n";
