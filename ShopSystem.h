@@ -3,25 +3,42 @@
 
 #include <iostream>
 #include "ModifierFactory.h"
+using namespace std;
 
 class ShopSystem {
 public:
-    IModifier* visitShop() {
-        std::cout << "\n--- AMAZING CARD SHOP ---\n";
-        std::cout << "Pilih Enhancer untuk dibeli:\n";
-        std::cout << "1. Flat Bonus Enhancer (+30 Score)\n";
-        std::cout << "2. Multiplier Enhancer (x2 Score)\n";
-        std::cout << "0. Lewati Shop\n";
-        std::cout << "Pilihan: ";
+    // Menerima referensi koin pemain agar bisa dikurangi saat membeli
+    IModifier* visitShop(int& playerCoins) {
+        cout << "\n--- AMAZING CARD SHOP ---\n";
+        cout << "Coins Anda: " << playerCoins << "\n";
+        cout << "Pilih Enhancer untuk dibeli:\n";
+        cout << "1. Flat Bonus Enhancer (+30 Score) - Harga: 4 Coins\n";
+        cout << "2. Multiplier Enhancer (x2 Score)  - Harga: 6 Coins\n";
+        cout << "0. Lewati Shop\n";
+        cout << "Pilihan: ";
         
         int choice;
-        std::cin >> choice;
+        cin >> choice;
         
-        if (choice == 1 || choice == 2) {
-            std::cout << ">> Enhancer berhasil dibeli!\n";
-            return ModifierFactory::createModifier(choice);
+        if (choice == 1) {
+            if (playerCoins >= 4) {
+                playerCoins -= 4;
+                cout << ">> Enhancer berhasil dibeli! Sisa koin: " << playerCoins << "\n";
+                return ModifierFactory::createModifier(1);
+            } else {
+                cout << ">> Koin tidak cukup!\n";
+            }
+        } else if (choice == 2) {
+            if (playerCoins >= 6) {
+                playerCoins -= 6;
+                cout << ">> Enhancer berhasil dibeli! Sisa koin: " << playerCoins << "\n";
+                return ModifierFactory::createModifier(2);
+            } else {
+                cout << ">> Koin tidak cukup!\n";
+            }
         }
-        std::cout << ">> Anda meninggalkan shop.\n";
+        
+        cout << ">> Anda meninggalkan shop.\n";
         return nullptr;
     }
 };
