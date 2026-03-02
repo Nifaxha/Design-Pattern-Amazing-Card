@@ -7,6 +7,7 @@
 #include "ScoringSystem.h"
 #include "modifiers/IModifier.h"
 #include "ShopSystem.h"
+using namespace std;
 
 class RunSession {
 private:
@@ -15,8 +16,8 @@ private:
     int handsRemaining;
     int discardsRemaining;
     int roundNumber;
-    std::vector<Card> currentHand;
-    std::vector<IModifier*> activeModifiers;
+    vector<Card> currentHand;
+    vector<IModifier*> activeModifiers;
     ScoringSystem scoringSystem;
     ShopSystem shopSystem;
 
