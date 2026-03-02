@@ -16,6 +16,7 @@ private:
     int handsRemaining;
     int discardsRemaining;
     int roundNumber;
+    int coins; // Tambahan untuk menyimpan jumlah koin pemain
     vector<Card> currentHand;
     vector<IModifier*> activeModifiers;
     ScoringSystem scoringSystem;
