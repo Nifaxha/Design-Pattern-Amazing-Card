@@ -1,58 +1,165 @@
 #ifndef SCORINGSYSTEM_H
 #define SCORINGSYSTEM_H
-using namespace std;
 
 #include <vector>
 #include <string>
+#include <map>
+#include <algorithm>
 #include "Card.h"
 
-// Interface Strategy
 class IScoringStrategy {
 public:
     virtual ~IScoringStrategy() = default;
-    virtual int calculateScore(const vector<Card>& cards) = 0;
-    virtual string getHandName() = 0;
+    virtual int calculateScore(const std::vector<Card>& cards) = 0;
+    virtual std::string getHandName() = 0;
 };
 
-// Concrete Strategy: Pair (Jika ada 2 kartu dengan nilai sama)
-class PairStrategy : public IScoringStrategy {
+class StraightFlushStrategy : public IScoringStrategy {
 public:
-    int calculateScore(const vector<Card>& cards) override {
-        if (cards.size() == 2 && cards[0].value == cards[1].value) {
-            return (cards[0].value * 2) + 50; // Base score Pair
+    int calculateScore(const std::vector<Card>& cards) override {
+        if (cards.size() < 5) return 0;
+        std::vector<int> vals;
+        std::string firstSuit = cards[0].suit;
+        for (const auto& c : cards) {
+            if (c.suit != firstSuit) return 0; // Bukan Flush
+            vals.push_back(c.value);
+        }
+        std::sort(vals.begin(), vals.end());
+        for (size_t i = 1; i < vals.size(); i++) {
+            if (vals[i] != vals[i-1] + 1) return 0; // Bukan Straight
+        }
+        return 800; // Base score
+    }
+    std::string getHandName() override { return "Straight Flush"; }
+};
+
+class FullHouseStrategy : public IScoringStrategy {
+public:
+    int calculateScore(const std::vector<Card>& cards) override {
+        if (cards.size() != 5) return 0;
+        std::map<int, int> counts;
+        for (const auto& c : cards) counts[c.value]++;
+        bool has3 = false, has2 = false;
+        for (auto const& [val, count] : counts) {
+            if (count == 3) has3 = true;
+            if (count == 2) has2 = true;
+        }
+        if (has3 && has2) return 400;
+        return 0;
+    }
+    std::string getHandName() override { return "Full House"; }
+};
+
+class FlushStrategy : public IScoringStrategy {
+public:
+    int calculateScore(const std::vector<Card>& cards) override {
+        if (cards.size() < 5) return 0;
+        std::string firstSuit = cards[0].suit;
+        for (const auto& c : cards) {
+            if (c.suit != firstSuit) return 0;
+        }
+        return 300;
+    }
+    std::string getHandName() override { return "Flush"; }
+};
+
+class StraightStrategy : public IScoringStrategy {
+public:
+    int calculateScore(const std::vector<Card>& cards) override {
+        if (cards.size() < 5) return 0;
+        std::vector<int> vals;
+        for (const auto& c : cards) vals.push_back(c.value);
+        std::sort(vals.begin(), vals.end());
+        for (size_t i = 1; i < vals.size(); i++) {
+            if (vals[i] != vals[i-1] + 1) return 0;
+        }
+        return 250;
+    }
+    std::string getHandName() override { return "Straight"; }
+};
+
+class ThreeOfAKindStrategy : public IScoringStrategy {
+public:
+    int calculateScore(const std::vector<Card>& cards) override {
+        std::map<int, int> counts;
+        for (const auto& c : cards) counts[c.value]++;
+        for (auto const& [val, count] : counts) {
+            if (count >= 3) return (val * 3) + 150;
         }
         return 0;
     }
-    string getHandName() override { return "Pair"; }
+    std::string getHandName() override { return "Three of a Kind"; }
 };
 
-// Concrete Strategy: High Card (Jumlah nilai biasa)
+class TwoPairStrategy : public IScoringStrategy {
+public:
+    int calculateScore(const std::vector<Card>& cards) override {
+        std::map<int, int> counts;
+        int pairCount = 0;
+        int score = 0;
+        for (const auto& c : cards) counts[c.value]++;
+        for (auto const& [val, count] : counts) {
+            if (count >= 2) {
+                pairCount++;
+                score += (val * 2);
+            }
+        }
+        if (pairCount >= 2) return score + 100;
+        return 0;
+    }
+    std::string getHandName() override { return "Two Pair"; }
+};
+
+class PairStrategy : public IScoringStrategy {
+public:
+    int calculateScore(const std::vector<Card>& cards) override {
+        std::map<int, int> counts;
+        for (const auto& c : cards) counts[c.value]++;
+        for (auto const& [val, count] : counts) {
+            if (count >= 2) return (val * 2) + 50;
+        }
+        return 0;
+    }
+    std::string getHandName() override { return "Pair"; }
+};
+
 class HighCardStrategy : public IScoringStrategy {
 public:
-    int calculateScore(const vector<Card>& cards) override {
+    int calculateScore(const std::vector<Card>& cards) override {
         int total = 0;
         for (const auto& c : cards) total += c.value;
-        return total + 10; // Base score High Card
+        return total + 10; 
     }
-    string getHandName() override { return "High Card"; }
+    std::string getHandName() override { return "High Card"; }
 };
 
-// Context class
 class ScoringSystem {
 public:
-    int evaluateHand(const vector<Card>& cards, string& outHandName) {
-        // Cek strategi Pair terlebih dahulu
-        PairStrategy pairStrat;
-        int score = pairStrat.calculateScore(cards);
-        if (score > 0) {
-            outHandName = pairStrat.getHandName();
-            return score;
+    int evaluateHand(const std::vector<Card>& cards, std::string& outHandName) {
+        // Daftar strategi dievaluasi dari yang paling kuat ke paling lemah
+        std::vector<IScoringStrategy*> strategies = {
+            new StraightFlushStrategy(),
+            new FullHouseStrategy(),
+            new FlushStrategy(),
+            new StraightStrategy(),
+            new ThreeOfAKindStrategy(),
+            new TwoPairStrategy(),
+            new PairStrategy(),
+            new HighCardStrategy()
+        };
+
+        int finalScore = 0;
+        for (auto strat : strategies) {
+            int score = strat->calculateScore(cards);
+            if (score > 0) {
+                outHandName = strat->getHandName();
+                finalScore = score;
+                break; // Hentikan jika kombinasi tertinggi sudah ditemukan
+            }
         }
 
-        // Default ke High Card
-        HighCardStrategy highCardStrat;
-        outHandName = highCardStrat.getHandName();
-        return highCardStrat.calculateScore(cards);
+        for (auto strat : strategies) delete strat; // Bersihkan memori
+        return finalScore;
     }
 };
 
