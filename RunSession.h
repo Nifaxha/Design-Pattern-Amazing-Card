@@ -13,13 +13,14 @@ private:
     int totalScore;
     int targetScore;
     int handsRemaining;
+    int discardsRemaining;
     int roundNumber;
     std::vector<Card> currentHand;
     std::vector<IModifier*> activeModifiers;
     ScoringSystem scoringSystem;
     ShopSystem shopSystem;
 
-    void generateHand();
+    void fillHand(); // Fungsi baru untuk mengisi kartu kosong
     void displayHand();
 
 public:
